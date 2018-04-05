@@ -1,0 +1,73 @@
+/*
+CSCI 476
+project
+part 1
+*/
+
+#define _POSIX_C_SOURCE 200112L
+#define _ISOC99_SOURCE
+#define __EXTENSIONS__
+#define _XOPEN_SOURCE 600
+
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <signal.h>
+#include <errno.h>
+#include <sys/wait.h>
+
+#define BUFFERSIZE 256 //tentative user input buffer size
+char userinputbuffer[BUFFERSIZE];//user input buffer
+
+void getUserInput(){
+  memset(&userinputbuffer, '\0', BUFFERSIZE);  //flush the input buffer
+  fgets(userinputbuffer, BUFFERSIZE, stdin);  //user input
+}
+
+void quittsh(){
+  printf("goodbye!\n");
+  exit(EXIT_SUCCESS);
+}
+
+/*signal masking function (put in main?)
+*/
+
+/*input handling function
+  get user input...
+  parse out the input. figure out what to do with it
+    the input may be only a function name, or potentially a function with a list
+    or arguments. the arguments need to be passed into the new process somehow. 
+  dispatch the next function (fork probably)
+*/
+//basic function to get user input and store it into a buffer
+
+/*fork handling function
+  default signal mask before fork
+  try to fork a child to run the selected process
+  I think that if the process can't be found, it'll just
+  fail gracefully on it's own (need to research)
+  If we make the built-in's forked children, we need to
+  make sure that the path to them is built in here someplace
+  also will uses an exec() call. This is going to be passed an array
+  of arguments taken from the user input
+*/
+
+/*functions for built in commands
+  though I'm starting to think that it makes more sense to just 
+  do everything as a forked process, just in case we don't, this
+  is some space set aside for those functions...
+*/
+
+int main(){
+  
+  //EXTREMELY BASIC input loop
+  //have to replace scanf with fgets in getuserinput() function
+  while(1){
+    printf("tsh > ");
+    getUserInput();
+    printf("you've input: %s\n", userinputbuffer);
+  }
+
+  return EXIT_SUCCESS;
+}
