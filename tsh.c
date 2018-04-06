@@ -19,6 +19,8 @@ part 1
 
 #define BUFFERSIZE 256 //tentative user input buffer size
 char userinputbuffer[BUFFERSIZE];//user input buffer
+struct sigaction action, oldaction;
+const int signalstoignore[] = {SIGQUIT,SIGINT ,SIGUSR1};
 
 void getUserInput(){
   memset(&userinputbuffer, '\0', BUFFERSIZE);  //flush the input buffer
@@ -30,8 +32,26 @@ void quittsh(){
   exit(EXIT_SUCCESS);
 }
 
-/*signal masking function (put in main?)
+/*signal masking function
 */
+void ignoresignals(int flag){
+  if(flag == 1)
+    action.sa_handler = SIG_IGN;
+  else
+    action.sa_handler = SIG_DFL;
+
+  sigemptyset(&action.sa_mask);
+  action.sa_flags = 0;
+
+  for(int i = 0; i < (int)(sizeof(signalstoignore) / sizeof(int)); i++ ){
+   if(sigaction(signalstoignore[i], &action, NULL) < 0){
+    fprintf(stderr, "sigaction failed %s\n",strerror(errno));
+    exit(EXIT_FAILURE);
+   }
+  }
+}
+
+
 
 /*input handling function
   get user input...
@@ -61,6 +81,8 @@ void quittsh(){
 
 int main(){
   
+  ignoresignals(1);
+
   //EXTREMELY BASIC input loop
   //have to replace scanf with fgets in getuserinput() function
   while(1){
