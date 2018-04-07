@@ -53,7 +53,7 @@ void ignoresignals(int flag){
 
 
 
-/*input handling function
+/* input handling function
   get user input...
   parse out the input. figure out what to do with it
     the input may be only a function name, or potentially a function with a list
