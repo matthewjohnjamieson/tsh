@@ -72,6 +72,26 @@ void ignoresignals(int flag){
   also will uses an exec() call. This is going to be passed an array
   of arguments taken from the user input
 */
+void forkchild(){
+  int pid = 0;
+  ignoresignals(0); // system default signal disposition
+
+  pid = fork();
+  
+  if(pid < 0){
+    fprintf(stderr, "fork error! %s\n", strerror(error));
+    exit(EXIT_FAILURE);
+  }
+  else if(pid > 0){
+    //parent...
+    //wait for child...
+    //reset signal dispo when done...
+  }
+  else{
+    //child
+    //do some work.
+  }
+}
 
 /*functions for built in commands
   though I'm starting to think that it makes more sense to just 
