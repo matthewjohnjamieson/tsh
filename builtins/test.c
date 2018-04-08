@@ -11,7 +11,10 @@
 #include <errno.h>
 #include <sys/wait.h>
 
-int main(){
+int main(int argc, char* argv[]){
   printf("I am the test program...\n");
+
+  if(argc > 1)
+    printf("and my first argument is: %s\n", argv[1]);
   return EXIT_SUCCESS;
 }

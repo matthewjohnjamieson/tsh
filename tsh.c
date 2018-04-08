@@ -97,7 +97,7 @@ void forkchild(){
     //reset signal dispo when done...
   }
   else{
-    execl("./builtins/test", "test", NULL);
+    execl("./builtins/test", "test", "foo", NULL);
     //child
     //do some work.
   }
@@ -112,7 +112,6 @@ void forkchild(){
 int main(){
   
   ignoresignals(1);
-
   //BASIC input loop
   while(1){
     printf("tsh > ");
