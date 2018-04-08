@@ -61,6 +61,13 @@ void ignoresignals(int flag){
   dispatch the next function (fork probably)
 */
 //basic function to get user input and store it into a buffer
+void inputhandler(){
+  int compare = strcmp(userinputbuffer, "quit\n");
+  printf("strcmp: %d\n", compare);
+  if(compare == 0)
+    quittsh();
+}
+
 
 /*fork handling function
   default signal mask before fork
@@ -106,10 +113,11 @@ int main(){
   
   ignoresignals(1);
 
-  //EXTREMELY BASIC input loop
+  //BASIC input loop
   while(1){
     printf("tsh > ");
     getUserInput();
+    inputhandler();
     printf("you've input: %s\n", userinputbuffer);
   }
 
