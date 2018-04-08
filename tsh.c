@@ -79,15 +79,18 @@ void forkchild(){
   pid = fork();
   
   if(pid < 0){
-    fprintf(stderr, "fork error! %s\n", strerror(error));
+    fprintf(stderr, "fork error! %s\n", strerror(errno));
     exit(EXIT_FAILURE);
   }
   else if(pid > 0){
+    wait(NULL);
+    ignoresignals(1);
     //parent...
     //wait for child...
     //reset signal dispo when done...
   }
   else{
+    execl("./builtins/test", "test", NULL);
     //child
     //do some work.
   }
@@ -104,7 +107,6 @@ int main(){
   ignoresignals(1);
 
   //EXTREMELY BASIC input loop
-  //have to replace scanf with fgets in getuserinput() function
   while(1){
     printf("tsh > ");
     getUserInput();
