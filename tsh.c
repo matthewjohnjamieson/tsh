@@ -19,6 +19,7 @@ part 1
 
 #define BUFFERSIZE 256 //tentative user input buffer size
 char userinputbuffer[BUFFERSIZE];//user input buffer
+char* userinputtokens[256]; //buffer to hold the array of tokens
 struct sigaction action, oldaction;
 const int signalstoignore[] = {SIGQUIT,SIGINT ,SIGUSR1};
 
@@ -62,11 +63,26 @@ void ignoresignals(int flag){
 */
 //basic function to get user input and store it into a buffer
 void inputhandler(){
+  
+  /* quit...  */
+
   int compare = strcmp(userinputbuffer, "quit\n");
   if(compare == 0)
     quittsh();
-}
 
+
+  /*tokenize user input...*/
+
+  const char* delim = " "; //token delimiter
+  char* token; //holds the current token
+  memset(userinputtokens, '\0', 256); //clear the token buffer
+
+  token = strtok(userinputbuffer, delim); //first do this
+  for(int i = 0;(i < (int)(sizeof(userinputbuffer) / sizeof(char))) && token ; i++){
+    userinputtokens[i] = token;
+    token = strtok(NULL, delim); //subsequent strtok calls are like this (who knows why?)
+  }
+}
 
 /*fork handling function
   default signal mask before fork
@@ -116,7 +132,14 @@ int main(){
     printf("tsh > ");
     getUserInput();
     inputhandler();
-    printf("you've input: %s\n", userinputbuffer);
+    
+    printf("you've input the following tokens:\n");
+    //print the buffer to make sure this worked...
+    for(int element = 0; element <  (int)(sizeof(userinputbuffer) / sizeof(char)); element++){
+      printf("%s\n", userinputtokens[element]);
+      if(!userinputtokens[element+1])
+        break;
+    }
   }
 
   return EXIT_SUCCESS;
