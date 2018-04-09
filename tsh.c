@@ -63,7 +63,6 @@ void ignoresignals(int flag){
 //basic function to get user input and store it into a buffer
 void inputhandler(){
   int compare = strcmp(userinputbuffer, "quit\n");
-  printf("strcmp: %d\n", compare);
   if(compare == 0)
     quittsh();
 }
