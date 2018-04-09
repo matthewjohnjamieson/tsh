@@ -22,6 +22,10 @@ char userinputbuffer[BUFFERSIZE];//user input buffer
 char* userinputtokens[256]; //buffer to hold the array of tokens
 struct sigaction action, oldaction;
 const int signalstoignore[] = {SIGQUIT,SIGINT ,SIGUSR1};
+const char* tshbuiltinspath = "./builtins/";
+const char* linuxcommandspath = "/bin/";
+
+
 
 void getUserInput(){
   memset(&userinputbuffer, '\0', BUFFERSIZE);  //flush the input buffer
@@ -99,22 +103,32 @@ void forkchild(){
   ignoresignals(0); // system default signal disposition
 
   pid = fork();
-  
   if(pid < 0){
     fprintf(stderr, "fork error! %s\n", strerror(errno));
     exit(EXIT_FAILURE);
   }
   else if(pid > 0){
-    wait(NULL);
-    ignoresignals(1);
-    //parent...
-    //wait for child...
-    //reset signal dispo when done...
+    wait(NULL); //wait for child
+    ignoresignals(1); //reset signals
   }
   else{
-    execl("./builtins/test", "test", "foo", NULL);
+    //copy paths
+    char* tshpath = (char*)malloc(sizeof(char*));
+    char* linpath = (char*)malloc(sizeof(char*));
+    strcpy(tshpath, tshbuiltinspath);
+    strcpy(linpath, linuxcommandspath);
+
+    //now append the command name to the paths (todo...)
+
+    if( execl("/bin/ls", "ls", "-l", NULL) == -1){
+      fprintf(stderr, "exec failed: %s\n", strerror(errno));
+    }
+    
     //child
     //do some work.
+    //or terminate self
+    free(tshpath);
+    free(linpath);
   }
 }
 
@@ -132,14 +146,7 @@ int main(){
     printf("tsh > ");
     getUserInput();
     inputhandler();
-    
-    printf("you've input the following tokens:\n");
-    //print the buffer to make sure this worked...
-    for(int element = 0; element <  (int)(sizeof(userinputbuffer) / sizeof(char)); element++){
-      printf("%s\n", userinputtokens[element]);
-      if(!userinputtokens[element+1])
-        break;
-    }
+    forkchild();
   }
 
   return EXIT_SUCCESS;
