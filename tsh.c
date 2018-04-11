@@ -74,6 +74,7 @@ void inputhandler(){
   if(compare == 0)
     quittsh();
 
+  userinputbuffer[strlen(userinputbuffer) - 1] = '\0'; //strip newline from user input
 
   /*tokenize user input...*/
 
@@ -113,22 +114,26 @@ void forkchild(){
   }
   else{
     //copy paths
-    char* tshpath = (char*)malloc(sizeof(char*));
-    char* linpath = (char*)malloc(sizeof(char*));
-    strcpy(tshpath, tshbuiltinspath);
-    strcpy(linpath, linuxcommandspath);
-
+    // char* tshpath = (char*)malloc(sizeof(char*));
+    // char* linpath = (char*)malloc(sizeof(char*));
+    // strcpy(tshpath, tshbuiltinspath);
+    // strcpy(linpath, linuxcommandspath);
     //now append the command name to the paths (todo...)
 
-    if( execl("/bin/ls", "ls", "-l", NULL) == -1){
+    char* path = (char*)malloc(sizeof(char*));
+    strcat(path, linuxcommandspath);
+    strcat(path, userinputtokens[0]);
+
+    printf("%s\n", path);
+    
+    if(execl(path, "-l" , NULL) == -1){
       fprintf(stderr, "exec failed: %s\n", strerror(errno));
+      exit(-1);//kill child process
     }
     
     //child
     //do some work.
     //or terminate self
-    free(tshpath);
-    free(linpath);
   }
 }
 
