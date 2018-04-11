@@ -41,11 +41,13 @@ int main(int argc, char *argv[]) {
 	}
 
 
-	// prints directory it changed to /////////
-	if(getcwd(cwd2, sizeof(cwd2)) == NULL){ 
+	// prints and saves directory it changed to /////////
+	if(getcwd(cwd2, sizeof(cwd2)) == NULL){ //saves cwd to cwd2
 		fprintf(stderr, "Error: getcwd failed.\n");
 		return EXIT_FAILURE;
 	}
 	printf("%s\n", cwd2);
 	//////////////////////////////////////////
+
+	return EXIT_SUCCESS;
 }
