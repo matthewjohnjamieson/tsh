@@ -26,7 +26,6 @@ const char* tshbuiltinspath = "./builtins/";
 const char* linuxcommandspath = "/bin/";
 
 
-
 void getUserInput(){
   memset(&userinputbuffer, '\0', BUFFERSIZE);  //flush the input buffer
   fgets(userinputbuffer, BUFFERSIZE, stdin);  //user input
@@ -120,13 +119,20 @@ void forkchild(){
     // strcpy(linpath, linuxcommandspath);
     //now append the command name to the paths (todo...)
 
+  /* possible branches of excecution:
+      ./ or some other path to indicate the user wants to run a program in the specified directory
+        or fail
+      just the program name:
+        try the builtins folder
+        try the linux default folder
+        or fail
+  */
+
     char* path = (char*)malloc(sizeof(char*));
     strcat(path, linuxcommandspath);
     strcat(path, userinputtokens[0]);
 
-    printf("%s\n", path);
-    
-    if(execl(path, "-l" , NULL) == -1){
+    if(execv(path, userinputtokens) == -1){
       fprintf(stderr, "exec failed: %s\n", strerror(errno));
       exit(-1);//kill child process
     }
