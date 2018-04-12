@@ -24,6 +24,7 @@ struct sigaction action, oldaction;
 const int signalstoignore[] = {SIGQUIT,SIGINT ,SIGUSR1};
 const char* tshbuiltinspath = "./builtins/";
 const char* linuxcommandspath = "/bin/";
+char userspecifiedpath[256];
 
 
 void getUserInput(){
@@ -36,7 +37,7 @@ void quittsh(){
   exit(EXIT_SUCCESS);
 }
 
-/*signal masking function
+/*signal disposition function
 */
 void ignoresignals(int flag){
   if(flag == 1)
@@ -80,12 +81,16 @@ void inputhandler(){
   const char* delim = " "; //token delimiter
   char* token; //holds the current token
   memset(userinputtokens, '\0', 256); //clear the token buffer
-
   token = strtok(userinputbuffer, delim); //first do this
   for(int i = 0;(i < (int)(sizeof(userinputbuffer) / sizeof(char))) && token ; i++){
     userinputtokens[i] = token;
     token = strtok(NULL, delim); //subsequent strtok calls are like this (who knows why?)
   }
+
+
+  /* handle the case where the user has specified a directory (eg ./) */
+  if(userinputtokens[0][0] == '.' || userinputtokens[0][0] == '/')
+    strcpy(userspecifiedpath, userinputtokens[0]);
 }
 
 /*fork handling function
