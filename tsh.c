@@ -66,10 +66,9 @@ void ignoresignals(int flag){
   dispatch the next function (fork probably)
 */
 //basic function to get user input and store it into a buffer
-void inputhandler(){
+int inputhandler(){
   
   /* quit...  */
-
   int compare = strcmp(userinputbuffer, "quit\n");
   if(compare == 0)
     quittsh();
@@ -77,7 +76,6 @@ void inputhandler(){
   userinputbuffer[strlen(userinputbuffer) - 1] = '\0'; //strip newline from user input
 
   /*tokenize user input...*/
-
   const char* delim = " "; //token delimiter
   char* token; //holds the current token
   memset(userinputtokens, '\0', 256); //clear the token buffer
@@ -86,11 +84,15 @@ void inputhandler(){
     userinputtokens[i] = token;
     token = strtok(NULL, delim); //subsequent strtok calls are like this (who knows why?)
   }
-
+  
+  if(!userinputtokens[0])
+    return -1;
 
   /* handle the case where the user has specified a directory (eg ./) */
   if(userinputtokens[0][0] == '.' || userinputtokens[0][0] == '/')
     strcpy(userspecifiedpath, userinputtokens[0]);
+
+  return 0;
 }
 
 /*fork handling function
