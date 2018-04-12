@@ -24,7 +24,7 @@ struct sigaction action, oldaction;
 const int signalstoignore[] = {SIGQUIT,SIGINT ,SIGUSR1};
 const char* tshbuiltinspath = "./builtins/";
 const char* linuxcommandspath = "/bin/";
-char userspecifiedpath[256];
+int userspecifiedpath = 0;
 
 
 void getUserInput(){
@@ -56,16 +56,8 @@ void ignoresignals(int flag){
   }
 }
 
-
-
 /* input handling function
-  get user input...
-  parse out the input. figure out what to do with it
-    the input may be only a function name, or potentially a function with a list
-    or arguments. the arguments need to be passed into the new process somehow. 
-  dispatch the next function (fork probably)
 */
-//basic function to get user input and store it into a buffer
 int inputhandler(){
   
   /* quit...  */
@@ -90,7 +82,7 @@ int inputhandler(){
 
   /* handle the case where the user has specified a directory (eg ./) */
   if(userinputtokens[0][0] == '.' || userinputtokens[0][0] == '/')
-    strcpy(userspecifiedpath, userinputtokens[0]);
+    userspecifiedpath = 1;
 
   return 0;
 }
@@ -106,31 +98,38 @@ void forkchild(){
     fprintf(stderr, "fork error! %s\n", strerror(errno));
     exit(EXIT_FAILURE);
   }
-  else if(pid > 0){
-    wait(NULL); //wait for child
+  else if(pid > 0){ // Parent branch
+    wait(NULL);
     ignoresignals(1); //reset signals
+    userspecifiedpath = 0;
   }
-  else{
-  /* possible branches of execution:
-      ./ or some other path to indicate the user wants to run a program in the specified directory
-        or fail
-      just the program name:
-        try the builtins folder
-        try the linux default folder
-        or fail
-  */
+  else{ // Child branch
 
+    // user specified path such as /usr/bin or ./
+    if(userspecifiedpath == 1){
+      if(execv(userinputtokens[0], userinputtokens) == -1){
+        exit(-1);//kill child process
+      }
+    }
+
+    // otherwise try the builtins folder
     char* path = (char*)malloc(sizeof(char*)); //<-bad init! char* isn't big enough for long paths.
+    strcat(path, tshbuiltinspath);
+    strcat(path, userinputtokens[0]);
+    execv(path, userinputtokens);
+    
+    free(path);
+    
+    // otherwise try the linux default folder
+    path = (char*)calloc(1, sizeof(char*)); //<-bad init! char* isn't big enough for long paths.
     strcat(path, linuxcommandspath);
     strcat(path, userinputtokens[0]);
-    if(execv(path, userinputtokens) == -1){
-      fprintf(stderr, "exec failed: %s\n", strerror(errno));
-      exit(-1);//kill child process
-    }
+    printf("path: %s\n", path );
+    execv(path, userinputtokens);
     
-    //child
-    //do some work.
-    //or terminate self
+    free(path);
+    exit(-1);//kill child process
+
   }
 }
 
