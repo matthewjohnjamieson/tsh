@@ -89,14 +89,6 @@ void inputhandler(){
 }
 
 /*fork handling function
-  default signal mask before fork
-  try to fork a child to run the selected process
-  I think that if the process can't be found, it'll just
-  fail gracefully on it's own (need to research)
-  If we make the built-in's forked children, we need to
-  make sure that the path to them is built in here someplace
-  also will uses an exec() call. This is going to be passed an array
-  of arguments taken from the user input
 */
 void forkchild(){
   int pid = 0;
@@ -112,14 +104,7 @@ void forkchild(){
     ignoresignals(1); //reset signals
   }
   else{
-    //copy paths
-    // char* tshpath = (char*)malloc(sizeof(char*));
-    // char* linpath = (char*)malloc(sizeof(char*));
-    // strcpy(tshpath, tshbuiltinspath);
-    // strcpy(linpath, linuxcommandspath);
-    //now append the command name to the paths (todo...)
-
-  /* possible branches of excecution:
+  /* possible branches of execution:
       ./ or some other path to indicate the user wants to run a program in the specified directory
         or fail
       just the program name:
@@ -128,10 +113,9 @@ void forkchild(){
         or fail
   */
 
-    char* path = (char*)malloc(sizeof(char*));
+    char* path = (char*)malloc(sizeof(char*)); //<-bad init! char* isn't big enough for long paths.
     strcat(path, linuxcommandspath);
     strcat(path, userinputtokens[0]);
-
     if(execv(path, userinputtokens) == -1){
       fprintf(stderr, "exec failed: %s\n", strerror(errno));
       exit(-1);//kill child process
@@ -143,16 +127,10 @@ void forkchild(){
   }
 }
 
-/*functions for built in commands
-  though I'm starting to think that it makes more sense to just 
-  do everything as a forked process, just in case we don't, this
-  is some space set aside for those functions...
-*/
-
 int main(){
   
   ignoresignals(1);
-  //BASIC input loop
+  //input loop
   while(1){
     printf("tsh > ");
     getUserInput();
