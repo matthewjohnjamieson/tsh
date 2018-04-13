@@ -1,7 +1,6 @@
 /*
 CSCI 476
-project
-part 1
+tiny shell
 */
 
 #define _POSIX_C_SOURCE 200112L
@@ -17,15 +16,19 @@ part 1
 #include <errno.h>
 #include <sys/wait.h>
 
-#define BUFFERSIZE 256 //tentative user input buffer size
+#define BUFFERSIZE 256 //user input buffer size
+#define PATHBUFFERSIZE 4096
 char userinputbuffer[BUFFERSIZE];//user input buffer
 char* userinputtokens[256]; //buffer to hold the array of tokens
 struct sigaction action, oldaction;
 const int signalstoignore[] = {SIGQUIT,SIGINT ,SIGUSR1};
 const char* tshbuiltinspath = "./builtins/";
 const char* linuxcommandspath = "/bin/";
-char userspecifiedpath[256];
+int userspecifiedpath = 0;
+int builtincalled = 0;
 
+/* function prototypes... */
+int cd(int,char**);
 
 void getUserInput(){
   memset(&userinputbuffer, '\0', BUFFERSIZE);  //flush the input buffer
@@ -56,20 +59,10 @@ void ignoresignals(int flag){
   }
 }
 
-
-
 /* input handling function
-  get user input...
-  parse out the input. figure out what to do with it
-    the input may be only a function name, or potentially a function with a list
-    or arguments. the arguments need to be passed into the new process somehow. 
-  dispatch the next function (fork probably)
 */
-//basic function to get user input and store it into a buffer
-void inputhandler(){
-  
+int inputhandler(){
   /* quit...  */
-
   int compare = strcmp(userinputbuffer, "quit\n");
   if(compare == 0)
     quittsh();
@@ -77,7 +70,6 @@ void inputhandler(){
   userinputbuffer[strlen(userinputbuffer) - 1] = '\0'; //strip newline from user input
 
   /*tokenize user input...*/
-
   const char* delim = " "; //token delimiter
   char* token; //holds the current token
   memset(userinputtokens, '\0', 256); //clear the token buffer
@@ -86,11 +78,20 @@ void inputhandler(){
     userinputtokens[i] = token;
     token = strtok(NULL, delim); //subsequent strtok calls are like this (who knows why?)
   }
+  
+  if(!userinputtokens[0])
+    return -1;
 
+  if(strcmp(userinputtokens[0], "cd") == 0){
+    builtincalled = 1;
+    cd((int)(sizeof(userinputtokens)/(sizeof(userinputtokens[0]))), userinputtokens);
+  }
 
   /* handle the case where the user has specified a directory (eg ./) */
   if(userinputtokens[0][0] == '.' || userinputtokens[0][0] == '/')
-    strcpy(userspecifiedpath, userinputtokens[0]);
+    userspecifiedpath = 1;
+
+  return 0;
 }
 
 /*fork handling function
@@ -104,31 +105,37 @@ void forkchild(){
     fprintf(stderr, "fork error! %s\n", strerror(errno));
     exit(EXIT_FAILURE);
   }
-  else if(pid > 0){
-    wait(NULL); //wait for child
+  else if(pid > 0){ // Parent branch
+    wait(NULL);
     ignoresignals(1); //reset signals
+    userspecifiedpath = 0;
   }
-  else{
-  /* possible branches of execution:
-      ./ or some other path to indicate the user wants to run a program in the specified directory
-        or fail
-      just the program name:
-        try the builtins folder
-        try the linux default folder
-        or fail
-  */
+  else{ // Child branch
 
-    char* path = (char*)malloc(sizeof(char*)); //<-bad init! char* isn't big enough for long paths.
+    // user specified path such as /usr/bin or ./
+    if(userspecifiedpath == 1){
+      if(execv(userinputtokens[0], userinputtokens) == -1){
+        exit(-1);//kill child process
+      }
+    }
+
+    // otherwise try the builtins folder
+    char* path = (char*)malloc(PATHBUFFERSIZE);
+    strcat(path, tshbuiltinspath);
+    strcat(path, userinputtokens[0]);
+    execv(path, userinputtokens);
+    
+    free(path);
+    
+    // otherwise try the linux default folder
+    path = (char*)calloc(1, PATHBUFFERSIZE);
     strcat(path, linuxcommandspath);
     strcat(path, userinputtokens[0]);
-    if(execv(path, userinputtokens) == -1){
-      fprintf(stderr, "exec failed: %s\n", strerror(errno));
-      exit(-1);//kill child process
-    }
+    execv(path, userinputtokens);
     
-    //child
-    //do some work.
-    //or terminate self
+    free(path);
+    exit(-1);//kill child process
+
   }
 }
 
@@ -140,7 +147,9 @@ int main(){
     printf("tsh > ");
     getUserInput();
     inputhandler();
-    forkchild();
+    if(builtincalled == 0)
+      forkchild();
+    builtincalled = 0;
   }
 
   return EXIT_SUCCESS;
