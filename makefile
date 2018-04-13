@@ -1,6 +1,6 @@
 CC=gcc
 CFLAGS=-Wall -Wextra
-SOURCE=tsh.c
+SOURCE=./functions/cd.c tsh.c
 
 all:
 	$(CC) $(CFLAGS) -g $(SOURCE)

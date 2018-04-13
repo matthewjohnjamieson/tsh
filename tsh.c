@@ -25,7 +25,7 @@ const int signalstoignore[] = {SIGQUIT,SIGINT ,SIGUSR1};
 const char* tshbuiltinspath = "./builtins/";
 const char* linuxcommandspath = "/bin/";
 
-
+int cd(int);
 
 void getUserInput(){
   memset(&userinputbuffer, '\0', BUFFERSIZE);  //flush the input buffer
@@ -73,7 +73,6 @@ void inputhandler(){
   int compare = strcmp(userinputbuffer, "quit\n");
   if(compare == 0)
     quittsh();
-
 
   /*tokenize user input...*/
 
