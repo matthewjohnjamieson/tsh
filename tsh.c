@@ -24,6 +24,7 @@ const int signalstoignore[] = {SIGQUIT,SIGINT ,SIGUSR1};
 const char* tshbuiltinspath = "./builtins/";
 const char* linuxcommandspath = "/bin/";
 int userspecifiedpath = 0;
+int builtincalled = 0;
 
 /* function prototypes... */
 int cd(int,char**);
@@ -80,8 +81,10 @@ int inputhandler(){
   if(!userinputtokens[0])
     return -1;
 
-  if(strcmp(userinputtokens[0], "cd") == 0)
+  if(strcmp(userinputtokens[0], "cd") == 0){
+    builtincalled = 1;
     cd((int)(sizeof(userinputtokens)/(sizeof(userinputtokens[0]))), userinputtokens);
+  }
 
   /* handle the case where the user has specified a directory (eg ./) */
   if(userinputtokens[0][0] == '.' || userinputtokens[0][0] == '/')
@@ -143,7 +146,9 @@ int main(){
     printf("tsh > ");
     getUserInput();
     inputhandler();
-    forkchild();
+    if(builtincalled == 0)
+      forkchild();
+    builtincalled = 0;
   }
 
   return EXIT_SUCCESS;
