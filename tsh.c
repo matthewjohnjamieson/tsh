@@ -16,7 +16,8 @@ tiny shell
 #include <errno.h>
 #include <sys/wait.h>
 
-#define BUFFERSIZE 256 //tentative user input buffer size
+#define BUFFERSIZE 256 //user input buffer size
+#define PATHBUFFERSIZE 4096
 char userinputbuffer[BUFFERSIZE];//user input buffer
 char* userinputtokens[256]; //buffer to hold the array of tokens
 struct sigaction action, oldaction;
@@ -119,7 +120,7 @@ void forkchild(){
     }
 
     // otherwise try the builtins folder
-    char* path = (char*)malloc(sizeof(char*)); //<-bad init! char* isn't big enough for long paths.
+    char* path = (char*)malloc(PATHBUFFERSIZE);
     strcat(path, tshbuiltinspath);
     strcat(path, userinputtokens[0]);
     execv(path, userinputtokens);
@@ -127,7 +128,7 @@ void forkchild(){
     free(path);
     
     // otherwise try the linux default folder
-    path = (char*)calloc(1, sizeof(char*)); //<-bad init! char* isn't big enough for long paths.
+    path = (char*)calloc(1, PATHBUFFERSIZE);
     strcat(path, linuxcommandspath);
     strcat(path, userinputtokens[0]);
     execv(path, userinputtokens);
