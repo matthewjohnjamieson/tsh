@@ -1,7 +1,6 @@
 /*
 CSCI 476
-project
-part 1
+tiny shell
 */
 
 #define _POSIX_C_SOURCE 200112L
@@ -24,7 +23,9 @@ struct sigaction action, oldaction;
 const int signalstoignore[] = {SIGQUIT,SIGINT ,SIGUSR1};
 const char* tshbuiltinspath = "./builtins/";
 const char* linuxcommandspath = "/bin/";
+int userspecifiedpath = 0;
 
+/* function prototypes... */
 int cd(int);
 
 void getUserInput(){
@@ -37,7 +38,7 @@ void quittsh(){
   exit(EXIT_SUCCESS);
 }
 
-/*signal masking function
+/*signal disposition function
 */
 void ignoresignals(int flag){
   if(flag == 1)
@@ -56,46 +57,37 @@ void ignoresignals(int flag){
   }
 }
 
-
-
 /* input handling function
-  get user input...
-  parse out the input. figure out what to do with it
-    the input may be only a function name, or potentially a function with a list
-    or arguments. the arguments need to be passed into the new process somehow. 
-  dispatch the next function (fork probably)
 */
-//basic function to get user input and store it into a buffer
-void inputhandler(){
-  
+int inputhandler(){
   /* quit...  */
-
   int compare = strcmp(userinputbuffer, "quit\n");
   if(compare == 0)
     quittsh();
 
-  /*tokenize user input...*/
+  userinputbuffer[strlen(userinputbuffer) - 1] = '\0'; //strip newline from user input
 
+  /*tokenize user input...*/
   const char* delim = " "; //token delimiter
   char* token; //holds the current token
   memset(userinputtokens, '\0', 256); //clear the token buffer
-
   token = strtok(userinputbuffer, delim); //first do this
   for(int i = 0;(i < (int)(sizeof(userinputbuffer) / sizeof(char))) && token ; i++){
     userinputtokens[i] = token;
     token = strtok(NULL, delim); //subsequent strtok calls are like this (who knows why?)
   }
+  
+  if(!userinputtokens[0])
+    return -1;
+
+  /* handle the case where the user has specified a directory (eg ./) */
+  if(userinputtokens[0][0] == '.' || userinputtokens[0][0] == '/')
+    userspecifiedpath = 1;
+
+  return 0;
 }
 
 /*fork handling function
-  default signal mask before fork
-  try to fork a child to run the selected process
-  I think that if the process can't be found, it'll just
-  fail gracefully on it's own (need to research)
-  If we make the built-in's forked children, we need to
-  make sure that the path to them is built in here someplace
-  also will uses an exec() call. This is going to be passed an array
-  of arguments taken from the user input
 */
 void forkchild(){
   int pid = 0;
@@ -106,41 +98,45 @@ void forkchild(){
     fprintf(stderr, "fork error! %s\n", strerror(errno));
     exit(EXIT_FAILURE);
   }
-  else if(pid > 0){
-    wait(NULL); //wait for child
+  else if(pid > 0){ // Parent branch
+    wait(NULL);
     ignoresignals(1); //reset signals
+    userspecifiedpath = 0;
   }
-  else{
-    //copy paths
-    char* tshpath = (char*)malloc(sizeof(char*));
-    char* linpath = (char*)malloc(sizeof(char*));
-    strcpy(tshpath, tshbuiltinspath);
-    strcpy(linpath, linuxcommandspath);
+  else{ // Child branch
 
-    //now append the command name to the paths (todo...)
-
-    if( execl("/bin/ls", "ls", "-l", NULL) == -1){
-      fprintf(stderr, "exec failed: %s\n", strerror(errno));
+    // user specified path such as /usr/bin or ./
+    if(userspecifiedpath == 1){
+      if(execv(userinputtokens[0], userinputtokens) == -1){
+        exit(-1);//kill child process
+      }
     }
+
+    // otherwise try the builtins folder
+    char* path = (char*)malloc(sizeof(char*)); //<-bad init! char* isn't big enough for long paths.
+    strcat(path, tshbuiltinspath);
+    strcat(path, userinputtokens[0]);
+    execv(path, userinputtokens);
     
-    //child
-    //do some work.
-    //or terminate self
-    free(tshpath);
-    free(linpath);
+    free(path);
+    
+    // otherwise try the linux default folder
+    path = (char*)calloc(1, sizeof(char*)); //<-bad init! char* isn't big enough for long paths.
+    strcat(path, linuxcommandspath);
+    strcat(path, userinputtokens[0]);
+    printf("path: %s\n", path );
+    execv(path, userinputtokens);
+    
+    free(path);
+    exit(-1);//kill child process
+
   }
 }
-
-/*functions for built in commands
-  though I'm starting to think that it makes more sense to just 
-  do everything as a forked process, just in case we don't, this
-  is some space set aside for those functions...
-*/
 
 int main(){
   
   ignoresignals(1);
-  //BASIC input loop
+  //input loop
   while(1){
     printf("tsh > ");
     getUserInput();
