@@ -26,7 +26,7 @@ const char* linuxcommandspath = "/bin/";
 int userspecifiedpath = 0;
 
 /* function prototypes... */
-int cd(int);
+int cd(int,char**);
 
 void getUserInput(){
   memset(&userinputbuffer, '\0', BUFFERSIZE);  //flush the input buffer
@@ -80,6 +80,9 @@ int inputhandler(){
   if(!userinputtokens[0])
     return -1;
 
+  if(strcmp(userinputtokens[0], "cd") == 0)
+    cd((int)(sizeof(userinputtokens)/(sizeof(userinputtokens[0]))), userinputtokens);
+
   /* handle the case where the user has specified a directory (eg ./) */
   if(userinputtokens[0][0] == '.' || userinputtokens[0][0] == '/')
     userspecifiedpath = 1;
@@ -124,7 +127,6 @@ void forkchild(){
     path = (char*)calloc(1, sizeof(char*)); //<-bad init! char* isn't big enough for long paths.
     strcat(path, linuxcommandspath);
     strcat(path, userinputtokens[0]);
-    printf("path: %s\n", path );
     execv(path, userinputtokens);
     
     free(path);
