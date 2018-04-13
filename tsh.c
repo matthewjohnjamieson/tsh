@@ -1,7 +1,6 @@
 /*
 CSCI 476
-project
-part 1
+tiny shell
 */
 
 #define _POSIX_C_SOURCE 200112L
@@ -59,7 +58,6 @@ void ignoresignals(int flag){
 /* input handling function
 */
 int inputhandler(){
-  
   /* quit...  */
   int compare = strcmp(userinputbuffer, "quit\n");
   if(compare == 0)
