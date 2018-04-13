@@ -15,14 +15,18 @@ tiny shell
 #include <signal.h>
 #include <errno.h>
 #include <sys/wait.h>
+#include <limits.h>
 
 #define BUFFERSIZE 256 //user input buffer size
-#define PATHBUFFERSIZE 4096
+#define PATHBUFFERSIZE PATH_MAX + 1
 char userinputbuffer[BUFFERSIZE];//user input buffer
 char* userinputtokens[256]; //buffer to hold the array of tokens
 struct sigaction action, oldaction;
 const int signalstoignore[] = {SIGQUIT,SIGINT ,SIGUSR1};
-const char* tshbuiltinspath = "./builtins/";
+
+//char pathbuffer[PATHBUFFERSIZE];
+//char* tshbuiltinspath = realpath("./builtins/", pathbuffer);
+
 const char* linuxcommandspath = "/bin/";
 int userspecifiedpath = 0;
 int builtincalled = 0;
@@ -127,15 +131,15 @@ void forkchild(){
     }
 
     // otherwise try the builtins folder
-    char* path = (char*)malloc(PATHBUFFERSIZE);
+    /*char* path = (char*)malloc(PATHBUFFERSIZE);
     strcat(path, tshbuiltinspath);
     strcat(path, userinputtokens[0]);
     execv(path, userinputtokens);
-    
     free(path);
+    */
     
     // otherwise try the linux default folder
-    path = (char*)calloc(1, PATHBUFFERSIZE);
+    char* path = (char*)calloc(1, PATHBUFFERSIZE);
     strcat(path, linuxcommandspath);
     strcat(path, userinputtokens[0]);
     execv(path, userinputtokens);
@@ -147,7 +151,6 @@ void forkchild(){
 }
 
 int main(){
-  
   ignoresignals(1);
   //input loop
   while(1){
