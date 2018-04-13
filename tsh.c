@@ -29,6 +29,7 @@ int builtincalled = 0;
 
 /* function prototypes... */
 int cd(int,char**);
+int echo(int,char**);
 
 void getUserInput(){
   memset(&userinputbuffer, '\0', BUFFERSIZE);  //flush the input buffer
@@ -86,6 +87,12 @@ int inputhandler(){
     builtincalled = 1;
     cd((int)(sizeof(userinputtokens)/(sizeof(userinputtokens[0]))), userinputtokens);
   }
+
+  if(strcmp(userinputtokens[0], "echo") == 0){
+    builtincalled = 1;
+    echo((int)(sizeof(userinputtokens)/(sizeof(userinputtokens[0]))), userinputtokens);
+  }
+
 
   /* handle the case where the user has specified a directory (eg ./) */
   if(userinputtokens[0][0] == '.' || userinputtokens[0][0] == '/')
