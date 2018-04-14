@@ -34,6 +34,7 @@ int builtincalled = 0;
 /* function prototypes... */
 int cd(int,char**);
 int echo(int,char**);
+int pwd(char*);
 
 void getUserInput(){
   memset(&userinputbuffer, '\0', BUFFERSIZE);  //flush the input buffer
@@ -95,6 +96,11 @@ int inputhandler(){
   if(strcmp(userinputtokens[0], "echo") == 0){
     builtincalled = 1;
     echo((int)(sizeof(userinputtokens)/(sizeof(userinputtokens[0]))), userinputtokens);
+  }
+
+  if(strcmp(userinputtokens[0], "pwd") == 0){
+    builtincalled = 1;
+    pwd("./");
   }
 
 
