@@ -66,13 +66,3 @@ int pwd(char *filename) {
    return 0;
 
 }
-
-int main(int argc, char *argv[]) {
-	int ret = pwd(argv[0]);
-	if(ret == -1) {
-		return EXIT_FAILURE;
-	}
-	return 0;
-
-
-}
