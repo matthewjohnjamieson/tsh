@@ -1,6 +1,6 @@
 CC=gcc
 CFLAGS=-Wall -Wextra
-SOURCE=./functions/cd.c ./functions/echo.c ./functions/pwd.c tsh.c
+SOURCE=./headers/bglist.h ./functions/bglist.c ./functions/cd.c ./functions/echo.c ./functions/pwd.c tsh.c
 
 all:
 	$(CC) $(CFLAGS) -g $(SOURCE)

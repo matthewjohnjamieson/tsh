@@ -15,7 +15,9 @@ tiny shell
 #include <signal.h>
 #include <errno.h>
 #include <sys/wait.h>
+#include <sys/types.h>
 #include <limits.h>
+#include "headers/bglist.h"
 
 #define BUFFERSIZE 256 //user input buffer size
 #define PATHBUFFERSIZE PATH_MAX + 1
