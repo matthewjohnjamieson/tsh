@@ -7,7 +7,7 @@
 
 struct node {
   char *processName; //stores the name of the process
-  pid_t *pid; //stores the pid of the process
+  pid_t pid; //stores the pid of the process
   struct node *prev;
   struct node *next;
 };
@@ -23,7 +23,7 @@ struct node *head = NULL;
 *  0: Success
 * -1: Error
 */
-int addNode(char * name, pid_t *propid) {
+int addNode(char * name, pid_t propid) {
   struct node *temp = (struct node *)malloc(sizeof(struct node));
   if(!temp) {
     fprintf(stderr, "malloc() failed: %s\n", strerror(errno));
@@ -55,7 +55,7 @@ int addNode(char * name, pid_t *propid) {
 * NULL: not found
 * if found, a pointer to the node is returned
 */
-struct node *findNodePid(pid_t *targetpid){
+struct node *findNodePid(pid_t targetpid){
   if(!head)
     return NULL;
   struct node *temp = head;
@@ -111,7 +111,7 @@ struct node *findNodeChar(char *targetname){
 * @parameter:
 * deletepid: the node with pid that is going to be deleted
 */
-void deleteNodePid(pid_t *deletepid) {
+void deleteNodePid(pid_t deletepid) {
   struct node *target = findNodePid(deletepid);
   if(!target) {
     return;
@@ -180,10 +180,9 @@ void printNode() {
   head->prev->next = NULL;
 
   while(temp) {
-    printf("Process Name: %s\nProcess PID: %d\n->",temp->processName, (int)temp->pid);
+    printf("Process Name: %s\nProcess PID: %d\n",temp->processName, (int)temp->pid);
     temp = temp->next;
   }
-  printf("^\n");
 }
 
 /*

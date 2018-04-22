@@ -158,8 +158,30 @@ void forkchild(){
   }
 }
 
+/*void listtests(){
+  int testpid1 = 123;
+  int testpid2 = 456; 
+  addNode("process 1", testpid1);
+  addNode("process 2", testpid2);
+  printNode();
+  struct node* n1 = malloc(sizeof(struct node*));
+  n1 = findNodeChar("process 1");
+  //printf("node name: %s\n", n1->processName);
+  deleteNodeChar("process 1");
+  printNode();
+  addNode("process 3", 789);
+  deleteNodePid(456);
+  printNode();
+  deleteNodePid(789);
+  printNode();
+  printNode();
+}
+*/
 int main(){
   ignoresignals(1);
+  
+  listtests();
+
   //input loop
   while(1){
     printf("tsh > ");
@@ -172,3 +194,5 @@ int main(){
 
   return EXIT_SUCCESS;
 }
+
+
