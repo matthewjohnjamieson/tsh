@@ -137,14 +137,6 @@ void forkchild(){
         exit(-1);//kill child process
       }
     }
-
-    // otherwise try the builtins folder
-    /*char* path = (char*)malloc(PATHBUFFERSIZE);
-    strcat(path, tshbuiltinspath);
-    strcat(path, userinputtokens[0]);
-    execv(path, userinputtokens);
-    free(path);
-    */
     
     // otherwise try the linux default folder
     char* path = (char*)calloc(1, PATHBUFFERSIZE);
