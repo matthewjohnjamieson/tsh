@@ -111,6 +111,11 @@ int inputhandler(){
     pwd("./");
   }
 
+  if(strcmp(userinputtokens[0], "bgjobs") == 0){
+    builtincalled = 1;
+    printNode();
+  }
+
 
   /* handle the case where the user has specified a directory (eg ./) */
   if(userinputtokens[0][0] == '.' || userinputtokens[0][0] == '/')
@@ -164,29 +169,29 @@ void forkchild(){
   }
 }
 
-/*void listtests(){
-  int testpid1 = 123;
-  int testpid2 = 456; 
-  addNode("process 1", testpid1);
-  addNode("process 2", testpid2);
-  printNode();
-  struct node* n1 = malloc(sizeof(struct node*));
-  n1 = findNodeChar("process 1");
-  //printf("node name: %s\n", n1->processName);
-  deleteNodeChar("process 1");
-  printNode();
-  addNode("process 3", 789);
-  deleteNodePid(456);
-  printNode();
-  deleteNodePid(789);
-  printNode();
-  printNode();
+void listtests(){
+  // int testpid1 = 123;
+  // int testpid2 = 456; 
+  // addNode("process 1", testpid1);
+  // addNode("process 2", testpid2);
+  // printNode();
+  // struct node* n1 = malloc(sizeof(struct node*));
+  // n1 = findNodeChar("process 1");
+  // //printf("node name: %s\n", n1->processName);
+  // deleteNodeChar("process 1");
+  // printNode();
+  // addNode("process 3", 789);
+  // deleteNodePid(456);
+  // printNode();
+  // deleteNodePid(789);
+  // printNode();
+  // printNode();
 }
-*/
+
 int main(){
   ignoresignals(1);
   
-  //listtests();
+  // listtests();
 
   //input loop
   while(1){
