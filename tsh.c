@@ -23,15 +23,15 @@ tiny shell
 #define PATHBUFFERSIZE PATH_MAX + 1
 char userinputbuffer[BUFFERSIZE];//user input buffer
 char* userinputtokens[256]; //buffer to hold the array of tokens
+int tokencount = 0;
 struct sigaction action, oldaction;
 const int signalstoignore[] = {SIGQUIT,SIGINT ,SIGUSR1};
-
-//char pathbuffer[PATHBUFFERSIZE];
-//char* tshbuiltinspath = realpath("./builtins/", pathbuffer);
-
 const char* linuxcommandspath = "/bin/";
 int userspecifiedpath = 0;
 int builtincalled = 0;
+int runinbackground = 0;
+
+pid_t globalpid;
 
 /* function prototypes... */
 int cd(int,char**);
@@ -85,10 +85,16 @@ int inputhandler(){
   for(int i = 0;(i < (int)(sizeof(userinputbuffer) / sizeof(char))) && token ; i++){
     userinputtokens[i] = token;
     token = strtok(NULL, delim); //subsequent strtok calls are like this (who knows why?)
+    tokencount++;
   }
   
   if(!userinputtokens[0])
     return -1;
+
+  if(strcmp(userinputtokens[tokencount - 1], "&") == 0){
+    runinbackground = 1;
+    userinputtokens[tokencount - 1] = NULL;
+  }
 
   if(strcmp(userinputtokens[0], "cd") == 0){
     builtincalled = 1;
@@ -120,12 +126,20 @@ void forkchild(){
   ignoresignals(0); // system default signal disposition
 
   pid = fork();
+  //globalpid = pid;
   if(pid < 0){
     fprintf(stderr, "fork error! %s\n", strerror(errno));
     exit(EXIT_FAILURE);
   }
   else if(pid > 0){ // Parent branch
-    wait(NULL);
+         
+    if(runinbackground == 0){
+      wait(&pid);
+    }
+    else{
+      setpgid(pid,0);
+    }
+    
     ignoresignals(1); //reset signals
     userspecifiedpath = 0;
   }
@@ -172,7 +186,7 @@ void forkchild(){
 int main(){
   ignoresignals(1);
   
-  listtests();
+  //listtests();
 
   //input loop
   while(1){
@@ -182,9 +196,9 @@ int main(){
     if(builtincalled == 0)
       forkchild();
     builtincalled = 0;
+    tokencount = 0;
+    runinbackground = 0;   
   }
 
   return EXIT_SUCCESS;
 }
-
-
