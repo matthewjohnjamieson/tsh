@@ -21,17 +21,18 @@ tiny shell
 
 #define BUFFERSIZE 256 //user input buffer size
 #define PATHBUFFERSIZE PATH_MAX + 1
+//input stuff
 char userinputbuffer[BUFFERSIZE];//user input buffer
 char* userinputtokens[256]; //buffer to hold the array of tokens
 int tokencount = 0;
+//signal stuff
 struct sigaction action, oldaction;
 const int signalstoignore[] = {SIGQUIT,SIGINT ,SIGUSR1};
+//logic stuff
 const char* linuxcommandspath = "/bin/";
 int userspecifiedpath = 0;
 int builtincalled = 0;
 int runinbackground = 0;
-
-pid_t globalpid;
 
 /* function prototypes... */
 int cd(int,char**);
@@ -131,7 +132,6 @@ void forkchild(){
   ignoresignals(0); // system default signal disposition
 
   pid = fork();
-  //globalpid = pid;
   if(pid < 0){
     fprintf(stderr, "fork error! %s\n", strerror(errno));
     exit(EXIT_FAILURE);
@@ -142,7 +142,7 @@ void forkchild(){
       wait(&pid);
     }
     else{
-      setpgid(pid,0);
+      setpgid(pid,0);//set a new group id for child (so child won't try to use the same io as parent)
     }
     
     ignoresignals(1); //reset signals
@@ -195,14 +195,15 @@ int main(){
 
   //input loop
   while(1){
+    builtincalled = 0;
+    tokencount = 0;
+    runinbackground = 0;   
+
     printf("tsh > ");
     getUserInput();
     inputhandler();
     if(builtincalled == 0)
       forkchild();
-    builtincalled = 0;
-    tokencount = 0;
-    runinbackground = 0;   
   }
 
   return EXIT_SUCCESS;
