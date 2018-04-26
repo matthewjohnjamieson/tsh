@@ -38,6 +38,7 @@ int runinbackground = 0;
 int cd(int,char**);
 int echo(int,char**);
 int pwd(char*);
+void terminate(pid_t);
 
 void getUserInput(){
   memset(&userinputbuffer, '\0', BUFFERSIZE);  //flush the input buffer
@@ -117,6 +118,11 @@ int inputhandler(){
     printNode();
   }
 
+  if(strcmp(userinputtokens[0], "terminate") == 0){
+    builtincalled = 1;
+    terminate(userinputtokens[1]);
+  }
+
 
   /* handle the case where the user has specified a directory (eg ./) */
   if(userinputtokens[0][0] == '.' || userinputtokens[0][0] == '/')
@@ -130,7 +136,7 @@ int inputhandler(){
 void forkchild(){
   int pid = 0;
   ignoresignals(0); // system default signal disposition
-
+ 
   pid = fork();
   if(pid < 0){
     fprintf(stderr, "fork error! %s\n", strerror(errno));
