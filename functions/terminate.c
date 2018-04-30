@@ -9,7 +9,7 @@
 #include <string.h>
 #include <sys/types.h>
 #include <signal.h>
-
+#include "headers/bglist.h"
 
 void terminate(char *pid){
     int ret;
@@ -23,6 +23,6 @@ void terminate(char *pid){
      }
 }
 
-void main(char *pid){
-  terminate(pid);
-}
+//void main(char *pid){
+//  terminate(pid);
+//}

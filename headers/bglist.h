@@ -14,3 +14,4 @@ void deleteNodePid(pid_t deletename);
 void deleteNodeChar(char *deletename);
 void printNode();
 void freeList();
+void terminate(char*);

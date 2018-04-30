@@ -4,6 +4,7 @@
 #include <errno.h>
 #include <string.h>
 #include <sys/types.h>
+#include <signal.h>
 
 struct node {
   char *processName; //stores the name of the process
@@ -29,7 +30,10 @@ int addNode(char * name, pid_t propid) {
     fprintf(stderr, "malloc() failed: %s\n", strerror(errno));
     return -1;
   }
-  temp->processName = name;
+  char* tempname = malloc(sizeof(name));
+  strcpy(tempname, name);
+  printf("%s\n", name);
+  temp->processName = tempname;
   temp->pid = propid;
   temp->prev = temp->next = NULL;
 
@@ -203,4 +207,16 @@ void freeList() {
     head = head->next;
     free(temp);
   }
+}
+
+void terminate(char *pid){
+    int ret;
+    ret = kill((atoi(pid)), SIGINT);
+    if (ret == 0 || errno == ESRCH){
+      deleteNodePid((unsigned long)(atoi(pid)));
+    }
+     else{
+      //kill() has returned -1
+      fprintf(stderr,"kill() failed %s.\n",strerror(errno));
+     }
 }

@@ -38,7 +38,6 @@ int runinbackground = 0;
 int cd(int,char**);
 int echo(int,char**);
 int pwd(char*);
-void terminate(pid_t);
 
 void getUserInput(){
   memset(&userinputbuffer, '\0', BUFFERSIZE);  //flush the input buffer
@@ -149,6 +148,8 @@ void forkchild(){
     }
     else{
       setpgid(pid,0);//set a new group id for child (so child won't try to use the same io as parent)
+
+      addNode(userinputtokens[0], pid);
     }
     
     ignoresignals(1); //reset signals
@@ -201,6 +202,7 @@ int main(){
 
   //input loop
   while(1){
+    waitpid(-1, NULL, WNOHANG);
     builtincalled = 0;
     tokencount = 0;
     runinbackground = 0;   
