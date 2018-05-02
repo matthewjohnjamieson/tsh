@@ -38,6 +38,7 @@ int runinbackground = 0;
 int cd(int,char**);
 int echo(int,char**);
 int pwd(char*);
+int reminder(int, char**);
 
 void getUserInput(){
   memset(&userinputbuffer, '\0', BUFFERSIZE);  //flush the input buffer
@@ -117,11 +118,10 @@ int inputhandler(){
     printNode();
   }
 
-  if(strcmp(userinputtokens[0], "terminate") == 0){
+  if(strcmp(userinputtokens[0], "reminder") == 0){
     builtincalled = 1;
-    terminate(userinputtokens[1]);
+    reminder(tokencount , userinputtokens);
   }
-
 
   /* handle the case where the user has specified a directory (eg ./) */
   if(userinputtokens[0][0] == '.' || userinputtokens[0][0] == '/')
@@ -135,7 +135,7 @@ int inputhandler(){
 void forkchild(){
   int pid = 0;
   ignoresignals(0); // system default signal disposition
- 
+
   pid = fork();
   if(pid < 0){
     fprintf(stderr, "fork error! %s\n", strerror(errno));
@@ -148,8 +148,6 @@ void forkchild(){
     }
     else{
       setpgid(pid,0);//set a new group id for child (so child won't try to use the same io as parent)
-
-      addNode(userinputtokens[0], pid);
     }
     
     ignoresignals(1); //reset signals
@@ -202,7 +200,6 @@ int main(){
 
   //input loop
   while(1){
-    waitpid(-1, NULL, WNOHANG);
     builtincalled = 0;
     tokencount = 0;
     runinbackground = 0;   
