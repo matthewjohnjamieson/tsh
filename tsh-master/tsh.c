@@ -120,9 +120,8 @@ int inputhandler(){
 
   if(strcmp(userinputtokens[0], "reminder") == 0){
     builtincalled = 1;
-    reminder((int)(sizeof(userinputtokens)/(sizeof(userinputtokens[0]))), userinputtokens);
+    reminder(tokencount , userinputtokens);
   }
-
 
   /* handle the case where the user has specified a directory (eg ./) */
   if(userinputtokens[0][0] == '.' || userinputtokens[0][0] == '/')

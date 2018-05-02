@@ -30,45 +30,39 @@ typedef struct remind{
 }remind;
 
 void *rem(void *remstruct){ //remind function that will remind user given message after a given amount of time
-
 	struct remind *tempArg = (struct remind *)remstruct;
-
 	sleep((int)tempArg->time);
-
 	pthread_mutex_lock(tempArg->mutexR);
-
 	printf("%s\n", tempArg->msg);
-
 	pthread_mutex_unlock(tempArg->mutexR);
-
 	pthread_exit(NULL);
 }
 
-int reminder(int argc, char *argv[]){
-	
-	if(argc <= 2){ //if there are not enough arguments
+int reminder(int remargc, char *remargv[]){
+  	
+	if(remargc <= 2){ //if there are not enough arguments
 		fprintf(stderr, "Error: Usage reminder <seconds> <string(s)>\n");
 		return EXIT_FAILURE;
 	}
-	
+  	
 	int ret;
-	int start = 2;
+	int start = 0;
 	char mess[BUFFER_SIZE];
 	memset(mess, '\0', BUFFER_SIZE * sizeof(char));
 
-	int temp = atoi(argv[1]);
+	int temp = atoi(remargv[1]);
 	if(temp < 0){
 		fprintf(stderr, "Error: Seconds is not a positive integer!\n");
 		return EXIT_FAILURE;
 	}
 
-	while(start < argc){	
-		strcat(mess, argv[start]);
+	while(start <= (remargc-1)){
+		strcat(mess, remargv[start]);
 		strcat(mess, " ");
 		start++;
 	}
-
-	pthread_mutex_t mutex;
+    	
+  pthread_mutex_t mutex;
 	pthread_t rthread[0];
 
 	remind *r = malloc(sizeof(remind));
