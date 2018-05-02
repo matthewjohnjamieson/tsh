@@ -22,8 +22,7 @@
 #define BUFFER_SIZE	4096
 
 typedef struct remind{
-
-	int *time; //user input for sleep time will be stored here
+	int time; //user input for sleep time will be stored here
 	char *msg; //user input message will be stored here
 	pthread_mutex_t *mutexR;
 
@@ -33,8 +32,11 @@ void *rem(void *remstruct){ //remind function that will remind user given messag
 	struct remind *tempArg = (struct remind *)remstruct;
 	sleep((int)tempArg->time);
 	pthread_mutex_lock(tempArg->mutexR);
-	printf("%s\n", tempArg->msg);
+	printf("\n REMINDER: %s\n", tempArg->msg);
 	pthread_mutex_unlock(tempArg->mutexR);
+  //free(r);
+  //pthread_mutex_destroy(&mutex);
+
 	pthread_exit(NULL);
 }
 
@@ -46,7 +48,7 @@ int reminder(int remargc, char *remargv[]){
 	}
   	
 	int ret;
-	int start = 0;
+	int start = 2;
 	char mess[BUFFER_SIZE];
 	memset(mess, '\0', BUFFER_SIZE * sizeof(char));
 
@@ -78,7 +80,7 @@ int reminder(int remargc, char *remargv[]){
 		return EXIT_FAILURE;
 	}
 	
-	r->time = (int *)temp; 	
+	r->time = temp; 	
 	if(temp == 0){
 		fprintf(stderr, "Error: Usage reminder <seconds> <string(s)>\n");
 	}
@@ -95,10 +97,10 @@ int reminder(int remargc, char *remargv[]){
 		return EXIT_FAILURE;
 	}
 
-	pthread_join(rthread[0], NULL);
+	//pthread_join(rthread[0], NULL);
 	
-	free(r);
-	pthread_mutex_destroy(&mutex);
+	//free(r);
+	//pthread_mutex_destroy(&mutex);
 
 	return EXIT_SUCCESS;
 }
