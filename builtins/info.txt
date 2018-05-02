@@ -1,1 +1,0 @@
-this folder will hold the built in programs. The shell will look here first for any called process.
