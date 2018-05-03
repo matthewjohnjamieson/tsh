@@ -175,6 +175,7 @@ void deleteNodeChar(char *deletename) {
 * prints all nodes in the doubly linked list
 */
 void printNode() {
+  
   if(!head)
       return;
   struct node *temp;

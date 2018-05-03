@@ -118,6 +118,12 @@ int inputhandler(){
     printNode();
   }
 
+  if(strcmp(userinputtokens[0], "terminate") == 0){
+    builtincalled = 1;
+    terminate(userinputtokens[1]);
+  }
+
+
   if(strcmp(userinputtokens[0], "reminder") == 0){
     builtincalled = 1;
     reminder(tokencount , userinputtokens);
@@ -147,7 +153,9 @@ void forkchild(){
       wait(&pid);
     }
     else{
+      addNode(userinputtokens[0],pid);
       setpgid(pid,0);//set a new group id for child (so child won't try to use the same io as parent)
+      
     }
     
     ignoresignals(1); //reset signals
@@ -200,6 +208,7 @@ int main(){
 
   //input loop
   while(1){
+    waitpid(-1, NULL, WNOHANG);
     builtincalled = 0;
     tokencount = 0;
     runinbackground = 0;   
